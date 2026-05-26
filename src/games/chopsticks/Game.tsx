@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { GameState, HandSide, Fingers } from './types';
+import type { Action, GameState, HandSide, Fingers } from './types';
 import { isValidHit, isValidTransfer, getValidTransfers } from './logic';
 
 const FINGER_DISPLAY: Record<number, string> = {
@@ -54,7 +54,7 @@ type Phase =
 interface GameProps {
   gameState: GameState;
   myRole: 'p1' | 'p2';
-  onAction: (action: Parameters<typeof import('./logic').applyAction>[1]) => void;
+  onAction: (action: Action) => void;
   roomCode: string;
 }
 
@@ -92,7 +92,9 @@ export function Game({ gameState, myRole, onAction, roomCode }: GameProps) {
   }
 
   function startTransfer() {
-    setTransferLeft(me.left);
+    const min = Math.max(0, myTotal - 4);
+    const max = Math.min(myTotal, 4);
+    setTransferLeft(Math.min(Math.max(me.left, min), max));
     setPhase({ mode: 'transfer' });
   }
 
@@ -215,7 +217,7 @@ export function Game({ gameState, myRole, onAction, roomCode }: GameProps) {
                 <span className="text-xs text-gray-400 w-10 text-right">Left</span>
                 <input
                   type="range"
-                  min={0}
+                  min={Math.max(0, myTotal - 4)}
                   max={Math.min(myTotal, 4)}
                   value={transferLeft}
                   onChange={(e) => setTransferLeft(Number(e.target.value))}

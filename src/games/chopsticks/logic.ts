@@ -90,7 +90,7 @@ export function getValidTransfers(state: GameState): Array<{ left: Fingers; righ
   const total = current.left + current.right;
   const results: Array<{ left: Fingers; right: Fingers }> = [];
 
-  for (let l = 0; l <= Math.min(total, 4); l++) {
+  for (let l = Math.max(0, total - 4); l <= Math.min(total, 4); l++) {
     const r = total - l;
     if (r >= 0 && r <= 4 && isValidTransfer(state, l, r)) {
       results.push({ left: l as Fingers, right: r as Fingers });

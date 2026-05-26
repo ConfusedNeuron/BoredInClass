@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ref, set, onValue, get, off } from 'firebase/database';
+import { ref, set, onValue, get } from 'firebase/database';
 import { db, ensureAnonymousAuth } from '../firebase';
 import { INITIAL_GAME_STATE, applyAction } from '../games/chopsticks/logic';
 import type { Action, GameState, Room } from '../games/chopsticks/types';
@@ -33,8 +33,9 @@ export function useChopsticksRoom() {
   }, []);
 
   function subscribe(code: string, role: 'p1' | 'p2') {
-    const roomRef = ref(db, `rooms/${code}`);
-    const handler = onValue(roomRef, (snap) => {
+    unsubRef.current?.();
+
+    const unsub = onValue(ref(db, `rooms/${code}`), (snap) => {
       const room: Room | null = snap.val();
       if (!room) return;
 
@@ -48,7 +49,7 @@ export function useChopsticksRoom() {
       }
     });
 
-    unsubRef.current = () => off(roomRef, 'value', handler);
+    unsubRef.current = unsub;
   }
 
   async function createRoom() {
